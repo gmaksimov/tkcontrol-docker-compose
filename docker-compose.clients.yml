@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+
+  salt-minion-test1:
+    image: saltstack/salt:2018.3
+    environment:
+      SALT_MINION_CONFIG: '{"master": "saltstack", "id": "test-client1"}'
+
+  salt-minion-test2:
+    image: saltstack/salt:2018.3
+    environment:
+      SALT_MINION_CONFIG: '{"master": "saltstack", "id": "test-client2"}'
+
+  salt-minion-test3:
+    image: saltstack/salt:2018.3
+    environment:
+      SALT_MINION_CONFIG: '{"master": "saltstack", "id": "test-client3"}'

@@ -1,0 +1,85 @@
+version: "3"
+
+services:
+
+  saltstack:
+    image: saltstack/salt:2018.3
+    ports:
+      - 0.0.0.0:4505:4505
+      - 0.0.0.0:4506:4506
+    restart: always
+    volumes:
+      - ./configs/saltstack/etc/salt:/etc/salt
+      - ./configs/saltstack/srv/salt:/srv/salt
+
+  frontend:
+    image: registry-iis.center.cg/tkcontrol/tkcontrol/frontend:latest
+    restart: always
+    volumes:
+      - ./configs/frontend/nginx.conf:/etc/nginx/nginx.conf
+
+  backend:
+    image: registry-iis.center.cg/tkcontrol/tkcontrol/backend:latest
+    restart: always
+    volumes:
+      - ./logs/backend:/backend/logs/
+      - ./configs/backend:/backend/configs/
+    depends_on:
+      - db
+      - mq
+    links:
+      - db
+      - mq
+
+  db_adapter:
+    image: registry-iis.center.cg/tkcontrol/tkcontrol/db_adapter:latest
+    volumes:
+      - ./logs/db_adapter:/db_adapter/logs/
+      - ./configs/db_adapter:/db_adapter/configs/
+    depends_on:
+      - db
+    links:
+      - db
+
+  services:
+    image: registry-iis.center.cg/tkcontrol/tkcontrol/services:latest
+    restart: always
+    volumes:
+      - ./logs/services:/services/logs/
+      - ./configs/services:/services/configs/
+    depends_on:
+      - saltstack
+      - db_adapter
+      - mq
+    links:
+      - saltstack
+      - db_adapter
+      - mq
+
+  proxy:
+    image: nginx:1.16.1
+    restart: always
+    volumes:
+      - ./configs/proxy/nginx.conf:/etc/nginx/nginx.conf
+      - ./configs/proxy/ssl:/etc/ssl/
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - backend
+      - frontend
+      - novnc-proxy
+    depends_on:
+      - backend
+      - frontend
+      - novnc-proxy
+
+  mq:
+    image: 'rabbitmq:3'
+    restart: always
+
+  db:
+    image: mongo:4.2
+    restart: always
+    volumes:
+      - ./db:/data/db

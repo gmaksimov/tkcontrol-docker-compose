@@ -1,0 +1,12 @@
+failhard: True
+
+fileserver_backend:
+  - roots
+
+file_roots:
+  base:
+    - /srv/salt/states
+
+key_logfile: /var/log/salt/key
+
+presence_events: True
