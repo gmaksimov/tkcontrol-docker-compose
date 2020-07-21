@@ -68,11 +68,9 @@ services:
     links:
       - backend
       - frontend
-      - novnc-proxy
     depends_on:
       - backend
       - frontend
-      - novnc-proxy
 
   mq:
     image: 'rabbitmq:3'
